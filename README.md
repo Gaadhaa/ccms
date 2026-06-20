@@ -31,6 +31,11 @@ The Campus Complaint Management System (CCMS) is a web-based application develop
 - LocalStorage
 - Git & GitHub
 
+- ## Default Admin Credentials
+
+Email: admin@ccms.com
+Password: admin123
+
 ## Project Structure
 src/
 │
