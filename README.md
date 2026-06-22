@@ -1,56 +1,51 @@
 # Campus Complaint Management System (CCMS)
 
-## Overview
-
-The Campus Complaint Management System (CCMS) is a web-based application developed using ReactJS. It provides a centralized platform for students to submit complaints, track complaint status, and receive updates. Administrators can manage complaints and update their status through an admin dashboard.
+## Project Overview
+A web-based system for managing student complaints efficiently within a campus environment.
 
 ## Features
-
-### Student Module
-- Student Registration
-- Student Login
-- Submit Complaints
-- View Complaint Status
-- Dashboard with Statistics
-- Track Pending and Resolved Complaints
-
-### Admin Module
+- Student Registration & Login
 - Admin Login
-- View All Complaints
-- Update Complaint Status
-- Dashboard Analytics
-- Complaint Management
+- Complaint Submission
+- Complaint Tracking
+- Complaint Status Updates
+- AI Chatbot Support
+- MongoDB Database Integration
 
-## Technology Stack
+## Technologies Used
+### Frontend
+- React.js
+- React Router
+- CSS
 
-- ReactJS
-- JavaScript
-- HTML5
-- CSS3
-- React Router DOM
-- LocalStorage
-- Git & GitHub
-
-- ## Default Admin Credentials
-
-Email: admin@ccms.com
-
-Password: admin123
+### Backend
+- Node.js
+- Express.js
+- MongoDB Atlas
+- Mongoose
 
 ## Project Structure
-src/
-│
-├── components/
-│ └── Navbar.jsx
-│
-├── pages/
-│ ├── Signup.jsx
-│ ├── Login.jsx
-│ ├── AdminLogin.jsx
-│ ├── StudentDashboard.jsx
-│ ├── AdminDashboard.jsx
-│ └── Complaints.jsx
-│
-├── App.jsx
-├── main.jsx
-└── App.css
+ccms/
+├── src/
+├── backend/
+├── public/
+└── README.md
+
+## Week 1
+- Frontend UI Development
+- Login & Signup Pages
+- Admin Dashboard
+- Complaint Management UI
+
+## Week 2
+- Express Backend Setup
+- MongoDB Atlas Connection
+- Mongoose Models
+- CRUD APIs
+- Thunder Client Testing
+
+## Future Enhancements
+- Real-time Notifications
+- Email Alerts
+- AI-powered Complaint Categorization
+- Analytics Dashboard
