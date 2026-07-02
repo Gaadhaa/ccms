@@ -1,36 +1,54 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    const users =
-      JSON.parse(localStorage.getItem("users")) || [];
+    try {
+      setLoading(true);
 
-    const user = users.find(
-      (u) =>
-        u.email === email &&
-        u.password === password
-    );
+      const res = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        {
+          email,
+          password,
+        }
+      );
 
-    if (user) {
       localStorage.setItem(
         "loggedInUser",
         JSON.stringify({
-          ...user,
+          ...res.data.user,
           role: "student",
         })
       );
 
+      alert("Login Successful");
+
       navigate("/student");
-    } else {
-      alert("Invalid Email or Password");
+
+      window.location.reload();
+
+    } catch (err) {
+
+      alert(
+        err.response?.data?.message ||
+          "Invalid Email or Password"
+      );
+
+    } finally {
+
+      setLoading(false);
+
     }
   };
 
@@ -47,17 +65,19 @@ function Login() {
     >
       <div
         style={{
-          width: "420px",
+          width: "430px",
           background: "#fff",
           padding: "40px",
-          borderRadius: "15px",
-          boxShadow: "0 10px 30px rgba(0,0,0,.2)",
+          borderRadius: "16px",
+          boxShadow:
+            "0 15px 35px rgba(0,0,0,.2)",
         }}
       >
         <h1
           style={{
             textAlign: "center",
             color: "#2563eb",
+            marginBottom: "8px",
           }}
         >
           CCMS
@@ -66,14 +86,15 @@ function Login() {
         <p
           style={{
             textAlign: "center",
-            color: "#666",
-            marginBottom: "25px",
+            color: "#64748b",
+            marginBottom: "30px",
           }}
         >
           Campus Complaint Management System
         </p>
 
         <form onSubmit={handleLogin}>
+
           <input
             type="email"
             placeholder="Enter Email"
@@ -81,43 +102,101 @@ function Login() {
             onChange={(e) =>
               setEmail(e.target.value)
             }
+            required
             style={{
               width: "100%",
-              padding: "12px",
+              padding: "14px",
+              border: "1px solid #ccc",
+              borderRadius: "8px",
               marginBottom: "15px",
+              fontSize: "15px",
             }}
-            required
           />
 
-          <input
-            type="password"
-            placeholder="Enter Password"
-            value={password}
-            onChange={(e) =>
-              setPassword(e.target.value)
-            }
+          <div
             style={{
-              width: "100%",
-              padding: "12px",
+              position: "relative",
+              marginBottom: "10px",
+            }}
+          >
+            <input
+              type={
+                showPassword
+                  ? "text"
+                  : "password"
+              }
+              placeholder="Enter Password"
+              value={password}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
+              required
+              style={{
+                width: "100%",
+                padding: "14px",
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+                fontSize: "15px",
+              }}
+            />
+
+            <span
+              onClick={() =>
+                setShowPassword(
+                  !showPassword
+                )
+              }
+              style={{
+                position: "absolute",
+                right: "15px",
+                top: "14px",
+                cursor: "pointer",
+                userSelect: "none",
+              }}
+            >
+              {showPassword ? "🙈" : "👁"}
+            </span>
+          </div>
+
+          <div
+            style={{
+              textAlign: "right",
               marginBottom: "20px",
             }}
-            required
-          />
+          >
+            <Link
+              to="/forgot-password"
+              style={{
+                color: "#2563eb",
+                textDecoration: "none",
+                fontSize: "14px",
+                fontWeight: "600",
+              }}
+            >
+              Forgot Password?
+            </Link>
+          </div>
 
           <button
             type="submit"
+            disabled={loading}
             style={{
               width: "100%",
-              padding: "12px",
+              padding: "14px",
               background: "#2563eb",
-              color: "white",
+              color: "#fff",
               border: "none",
               borderRadius: "8px",
               cursor: "pointer",
+              fontSize: "16px",
+              fontWeight: "600",
             }}
           >
-            Student Login
+            {loading
+              ? "Logging in..."
+              : "Student Login"}
           </button>
+
         </form>
 
         <button
@@ -126,13 +205,15 @@ function Login() {
           }
           style={{
             width: "100%",
-            marginTop: "12px",
-            padding: "12px",
+            marginTop: "15px",
+            padding: "14px",
             background: "#0f172a",
-            color: "white",
+            color: "#fff",
             border: "none",
             borderRadius: "8px",
             cursor: "pointer",
+            fontSize: "16px",
+            fontWeight: "600",
           }}
         >
           Admin Login
@@ -141,11 +222,19 @@ function Login() {
         <p
           style={{
             textAlign: "center",
-            marginTop: "20px",
+            marginTop: "25px",
+            color: "#64748b",
           }}
         >
           New Student?{" "}
-          <Link to="/signup">
+          <Link
+            to="/signup"
+            style={{
+              color: "#2563eb",
+              fontWeight: "600",
+              textDecoration: "none",
+            }}
+          >
             Create Account
           </Link>
         </p>

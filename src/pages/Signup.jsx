@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 
 function Signup() {
   const [name, setName] = useState("");
@@ -8,39 +9,32 @@ function Signup() {
 
   const navigate = useNavigate();
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
 
-    const users =
-      JSON.parse(localStorage.getItem("users")) || [];
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/api/auth/signup",
+        {
+          name,
+          email,
+          password,
+        }
+      );
 
-    const existingUser = users.find(
-      (user) => user.email === email
-    );
+      alert(res.data.message);
 
-    if (existingUser) {
-      alert("Email already registered");
-      return;
+      setName("");
+      setEmail("");
+      setPassword("");
+
+      navigate("/");
+    } catch (error) {
+      alert(
+        error.response?.data?.message ||
+          "Registration Failed"
+      );
     }
-
-    const newUser = {
-      id: Date.now(),
-      name,
-      email,
-      password,
-      role: "student",
-    };
-
-    users.push(newUser);
-
-    localStorage.setItem(
-      "users",
-      JSON.stringify(users)
-    );
-
-    alert("Registration Successful!");
-
-    navigate("/");
   };
 
   return (

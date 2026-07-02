@@ -5,26 +5,38 @@ const complaintSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
+      trim: true,
     },
 
     category: {
       type: String,
       required: true,
+      trim: true,
     },
 
     status: {
       type: String,
+      enum: ["Pending", "In Progress", "Resolved"],
       default: "Pending",
+    },
+
+    priority: {
+      type: String,
+      enum: ["High", "Medium", "Low"],
+      default: "Low",
     },
 
     studentName: {
       type: String,
       required: true,
+      trim: true,
     },
 
     studentEmail: {
       type: String,
       required: true,
+      lowercase: true,
+      trim: true,
     },
   },
   {

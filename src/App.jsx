@@ -1,4 +1,9 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 
@@ -10,24 +15,34 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Complaints from "./pages/Complaints";
 import Chatbot from "./pages/Chatbot";
 
+// NEW IMPORTS
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+
 import "./App.css";
 
-function App() {
+function Layout() {
+  const location = useLocation();
+
+  const hideNavbar =
+    location.pathname === "/" ||
+    location.pathname === "/signup" ||
+    location.pathname === "/adminlogin" ||
+    location.pathname === "/forgot-password" ||
+    location.pathname.startsWith("/reset-password");
+
   return (
-    <BrowserRouter>
-      <Navbar />
+    <>
+      {!hideNavbar && <Navbar />}
 
       <Routes>
+        {/* Student */}
+
         <Route path="/" element={<Login />} />
 
         <Route
           path="/signup"
           element={<Signup />}
-        />
-
-        <Route
-          path="/adminlogin"
-          element={<AdminLogin />}
         />
 
         <Route
@@ -45,11 +60,39 @@ function App() {
           element={<Chatbot />}
         />
 
+        {/* Admin */}
+
+        <Route
+          path="/adminlogin"
+          element={<AdminLogin />}
+        />
+
         <Route
           path="/admin"
           element={<AdminDashboard />}
         />
+
+        {/* Forgot Password */}
+
+        <Route
+          path="/forgot-password"
+          element={<ForgotPassword />}
+        />
+
+        <Route
+          path="/reset-password/:token"
+          element={<ResetPassword />}
+        />
+
       </Routes>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Layout />
     </BrowserRouter>
   );
 }

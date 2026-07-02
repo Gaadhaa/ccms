@@ -1,9 +1,12 @@
 import express from "express";
 import Complaint from "../models/Complaint.js";
+import sendMail from "../utils/sendMail.js";
 
 const router = express.Router();
 
-// GET ALL COMPLAINTS
+
+// ================= GET ALL COMPLAINTS =================
+
 router.get("/", async (req, res) => {
   try {
     const complaints = await Complaint.find();
@@ -15,52 +18,122 @@ router.get("/", async (req, res) => {
   }
 });
 
-// CREATE COMPLAINT
+
+// ================= CREATE COMPLAINT =================
+
 router.post("/", async (req, res) => {
   try {
-    const complaint = await Complaint.create(req.body);
+
+    let priority = "Low";
+
+    if (
+      req.body.category === "Internet" ||
+      req.body.category === "Electrical"
+    ) {
+      priority = "High";
+    } else if (
+      req.body.category === "Hostel" ||
+      req.body.category === "Transport"
+    ) {
+      priority = "Medium";
+    }
+
+    const complaint = await Complaint.create({
+      ...req.body,
+      priority,
+    });
 
     res.status(201).json(complaint);
+
   } catch (error) {
+
     res.status(400).json({
       message: error.message,
     });
+
   }
 });
 
-// UPDATE COMPLAINT
+
+// ================= UPDATE COMPLAINT =================
+
 router.put("/:id", async (req, res) => {
+
   try {
+
+    const oldComplaint = await Complaint.findById(
+      req.params.id
+    );
+
     const complaint =
       await Complaint.findByIdAndUpdate(
         req.params.id,
         req.body,
-        { new: true }
+        {
+          new: true,
+        }
       );
 
+    // Send email only when status changes to Resolved
+
+    if (
+      oldComplaint.status !== "Resolved" &&
+      complaint.status === "Resolved"
+    ) {
+
+      await sendMail(
+        complaint.studentEmail,
+        complaint.studentName,
+        complaint.title,
+        complaint.category,
+        complaint.status
+      );
+
+      console.log(
+        "Resolution email sent successfully."
+      );
+
+    }
+
     res.json(complaint);
+
   } catch (error) {
+
+    console.log(error);
+
     res.status(400).json({
       message: error.message,
     });
+
   }
+
 });
 
-// DELETE COMPLAINT
+
+// ================= DELETE COMPLAINT =================
+
 router.delete("/:id", async (req, res) => {
+
   try {
+
     await Complaint.findByIdAndDelete(
       req.params.id
     );
 
     res.json({
-      message: "Complaint Deleted Successfully",
+      message:
+        "Complaint Deleted Successfully",
     });
+
   } catch (error) {
+
     res.status(500).json({
       message: error.message,
     });
+
   }
+
 });
+
 
 export default router;
