@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// Create transporter
+// Gmail Transporter
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -12,13 +12,14 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Function to send complaint resolved email
+// Send Complaint Resolution Email
 const sendMail = async (
   studentEmail,
   studentName,
   complaintTitle,
   category,
-  status
+  status,
+  remark
 ) => {
   try {
     const mailOptions = {
@@ -27,76 +28,176 @@ const sendMail = async (
       subject: "✅ Your Complaint Has Been Resolved",
 
       html: `
-        <div style="font-family:Arial,sans-serif;padding:20px;background:#f5f7fa;">
-          
-          <div style="max-width:600px;margin:auto;background:#ffffff;border-radius:10px;padding:30px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+      <div style="font-family:Arial,sans-serif;background:#f4f6f9;padding:30px;">
 
-            <h2 style="color:#2563eb;text-align:center;">
+        <div style="max-width:650px;margin:auto;background:#ffffff;border-radius:12px;padding:30px;box-shadow:0 5px 15px rgba(0,0,0,.1);">
+
+          <div style="text-align:center;">
+            <h2 style="color:#2563eb;margin-bottom:5px;">
               Campus Complaint Management System
             </h2>
 
-            <hr>
-
-            <p>Hello <strong>${studentName}</strong>,</p>
-
-            <p>
-              We are pleased to inform you that your complaint has been
-              <strong style="color:green;">resolved successfully.</strong>
+            <p style="color:#64748b;">
+              Complaint Resolution Notification
             </p>
-
-            <table style="width:100%;border-collapse:collapse;margin-top:20px;">
-              <tr>
-                <td style="padding:10px;"><strong>Complaint</strong></td>
-                <td style="padding:10px;">${complaintTitle}</td>
-              </tr>
-
-              <tr style="background:#f8fafc;">
-                <td style="padding:10px;"><strong>Category</strong></td>
-                <td style="padding:10px;">${category}</td>
-              </tr>
-
-              <tr>
-                <td style="padding:10px;"><strong>Status</strong></td>
-                <td style="padding:10px;color:green;">
-                  ${status}
-                </td>
-              </tr>
-            </table>
-
-            <br>
-
-            <p>
-              Thank you for using the
-              <strong>Campus Complaint Management System (CCMS)</strong>.
-            </p>
-
-            <p>
-              If you continue to face the issue, you may submit a new complaint.
-            </p>
-
-            <br>
-
-            <hr>
-
-            <p style="font-size:13px;color:#777;text-align:center;">
-              This is an automated email from CCMS.
-              Please do not reply to this email.
-            </p>
-
           </div>
 
+          <hr>
+
+          <p>Hello <strong>${studentName}</strong>,</p>
+
+          <p>
+            We are pleased to inform you that your complaint has been
+            <strong style="color:green;">
+              resolved successfully.
+            </strong>
+          </p>
+
+          <table
+            style="
+              width:100%;
+              border-collapse:collapse;
+              margin-top:20px;
+            "
+          >
+
+            <tr>
+              <td
+                style="
+                  padding:12px;
+                  background:#f8fafc;
+                  font-weight:bold;
+                  width:180px;
+                "
+              >
+                Complaint
+              </td>
+
+              <td style="padding:12px;">
+                ${complaintTitle}
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                style="
+                  padding:12px;
+                  background:#f8fafc;
+                  font-weight:bold;
+                "
+              >
+                Category
+              </td>
+
+              <td style="padding:12px;">
+                ${category}
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                style="
+                  padding:12px;
+                  background:#f8fafc;
+                  font-weight:bold;
+                "
+              >
+                Status
+              </td>
+
+              <td
+                style="
+                  padding:12px;
+                  color:green;
+                  font-weight:bold;
+                "
+              >
+                ${status}
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                style="
+                  padding:12px;
+                  background:#f8fafc;
+                  font-weight:bold;
+                "
+              >
+                Admin Remark
+              </td>
+
+              <td
+                style="
+                  padding:12px;
+                  color:#334155;
+                "
+              >
+                ${
+                  remark && remark.trim() !== ""
+                    ? remark
+                    : "No additional remarks provided."
+                }
+              </td>
+            </tr>
+
+          </table>
+
+          <br>
+
+          <div
+            style="
+              background:#eff6ff;
+              border-left:5px solid #2563eb;
+              padding:15px;
+              border-radius:8px;
+            "
+          >
+            <strong>Need Further Assistance?</strong>
+
+            <p style="margin-top:8px;">
+              If the issue still persists, you can
+              submit a new complaint through the
+              CCMS portal.
+            </p>
+          </div>
+
+          <br>
+
+          <p>
+            Thank you for using the
+            <strong>
+              Campus Complaint Management System
+            </strong>.
+          </p>
+
+          <hr>
+
+          <p
+            style="
+              text-align:center;
+              color:#94a3b8;
+              font-size:13px;
+            "
+          >
+            This is an automated email from CCMS.
+            Please do not reply.
+          </p>
+
         </div>
+
+      </div>
       `,
     };
 
-    const info = await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
 
-    console.log("✅ Email Sent Successfully");
-    console.log(info.response);
+    console.log("✅ Resolution Email Sent Successfully");
 
   } catch (error) {
 
-    console.log("❌ Email Sending Failed");
+    console.log("❌ Failed to Send Email");
+
     console.log(error);
 
   }

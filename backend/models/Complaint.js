@@ -26,6 +26,12 @@ const complaintSchema = new mongoose.Schema(
       default: "Low",
     },
 
+    // NEW
+    remark: {
+      type: String,
+      default: "",
+    },
+
     studentName: {
       type: String,
       required: true,

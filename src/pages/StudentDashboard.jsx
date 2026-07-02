@@ -2,41 +2,30 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 function StudentDashboard() {
-
   const [complaints, setComplaints] = useState([]);
 
-  const [selectedComplaint, setSelectedComplaint] =
-    useState(null);
-
-  const currentUser = JSON.parse(
-    localStorage.getItem("loggedInUser")
-  );
+  const currentUser =
+    JSON.parse(localStorage.getItem("loggedInUser")) || {};
 
   useEffect(() => {
     fetchComplaints();
   }, []);
 
   const fetchComplaints = async () => {
-
     try {
-
       const res = await axios.get(
         "http://localhost:5000/api/complaints"
       );
 
-      const userComplaints = res.data.filter(
-        (c) =>
-          c.studentEmail === currentUser?.email
+      const myComplaints = res.data.filter(
+        (c) => c.studentEmail === currentUser.email
       );
 
-      setComplaints(userComplaints);
+      setComplaints(myComplaints);
 
-    } catch (err) {
-
-      console.log(err);
-
+    } catch (error) {
+      console.log(error);
     }
-
   };
 
   const total = complaints.length;
@@ -54,224 +43,99 @@ function StudentDashboard() {
   ).length;
 
   const getStatusColor = (status) => {
-
-    if (status === "Resolved")
-      return "#22c55e";
-
-    if (status === "In Progress")
-      return "#2563eb";
-
+    if (status === "Resolved") return "#22c55e";
+    if (status === "In Progress") return "#3b82f6";
     return "#f59e0b";
-
   };
 
   const formatDate = (date) => {
-
-    return new Date(date).toLocaleDateString();
-
+    return new Date(date).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   const formatTime = (date) => {
-
-    return new Date(date).toLocaleTimeString();
-
+    return new Date(date).toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
-  const ComplaintModal = () => {
-
-    if (!selectedComplaint) return null;
-
-    return (
+  return (
+    <div
+      style={{
+        maxWidth: "1250px",
+        margin: "35px auto",
+        padding: "20px",
+      }}
+    >
 
       <div
         style={{
-          position: "fixed",
-          inset: 0,
-          background: "rgba(0,0,0,.45)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          zIndex: 1000,
+          textAlign: "center",
+          marginBottom: "35px",
         }}
       >
-
-        <div
+        <h1
           style={{
-            width: "500px",
-            background: "#fff",
-            padding: "30px",
-            borderRadius: "15px",
-            boxShadow:
-              "0 10px 25px rgba(0,0,0,.2)",
+            fontSize: "42px",
+            color: "#0f172a",
           }}
         >
+          Welcome, {currentUser.name}
+        </h1>
 
-          <h2
-            style={{
-              color: "#2563eb",
-              marginBottom: "20px",
-            }}
-          >
-            Complaint Details
-          </h2>
-
-          <p>
-            <b>Title:</b>{" "}
-            {selectedComplaint.title}
-          </p>
-
-          <p>
-            <b>Category:</b>{" "}
-            {selectedComplaint.category}
-          </p>
-
-          <p>
-            <b>Status:</b>{" "}
-            {selectedComplaint.status}
-          </p>
-
-          <p>
-            <b>Student:</b>{" "}
-            {selectedComplaint.studentName}
-          </p>
-
-          <p>
-            <b>Email:</b>{" "}
-            {selectedComplaint.studentEmail}
-          </p>
-
-          <p>
-            <b>Date:</b>{" "}
-            {formatDate(
-              selectedComplaint.createdAt
-            )}
-          </p>
-
-          <p>
-            <b>Time:</b>{" "}
-            {formatTime(
-              selectedComplaint.createdAt
-            )}
-          </p>
-
-          <button
-            onClick={() =>
-              setSelectedComplaint(null)
-            }
-            style={{
-              width: "100%",
-              marginTop: "20px",
-              padding: "12px",
-              background: "#2563eb",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-            }}
-          >
-            Close
-          </button>
-
-        </div>
-
+        <p
+          style={{
+            color: "#64748b",
+            fontSize: "17px",
+          }}
+        >
+          Track all your complaints here.
+        </p>
       </div>
 
-    );
-
-  };
-  return (
-  <div
-    style={{
-      maxWidth: "1200px",
-      margin: "30px auto",
-      padding: "20px",
-    }}
-  >
-    {/* Heading */}
-
-    <div
-      style={{
-        textAlign: "center",
-        marginBottom: "35px",
-      }}
-    >
-      <h1
+      <div
         style={{
-          fontSize: "40px",
-          color: "#0f172a",
+          display: "grid",
+          gridTemplateColumns: "repeat(4,1fr)",
+          gap: "20px",
+          marginBottom: "35px",
         }}
       >
-        Welcome, {currentUser?.name}
-      </h1>
+        <Card title="Total" value={total} color="#2563eb" />
+        <Card title="Pending" value={pending} color="#f59e0b" />
+        <Card title="In Progress" value={inProgress} color="#3b82f6" />
+        <Card title="Resolved" value={resolved} color="#22c55e" />
+      </div>
+            {/* Complaint Table */}
 
-      <p
+      <div
         style={{
-          color: "#64748b",
+          background: "#fff",
+          borderRadius: "15px",
+          boxShadow: "0 8px 20px rgba(0,0,0,.08)",
+          overflow: "hidden",
         }}
       >
-        Track and manage all your complaints
-      </p>
-    </div>
+        <div
+          style={{
+            padding: "20px",
+            borderBottom: "1px solid #e5e7eb",
+          }}
+        >
+          <h2
+            style={{
+              margin: 0,
+              color: "#0f172a",
+            }}
+          >
+            My Complaints
+          </h2>
+        </div>
 
-    {/* Cards */}
-
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns:
-          "repeat(auto-fit,minmax(220px,1fr))",
-        gap: "20px",
-        marginBottom: "35px",
-      }}
-    >
-      <Card
-        title="Total"
-        value={total}
-        color="#2563eb"
-      />
-
-      <Card
-        title="Pending"
-        value={pending}
-        color="#f59e0b"
-      />
-
-      <Card
-        title="In Progress"
-        value={inProgress}
-        color="#3b82f6"
-      />
-
-      <Card
-        title="Resolved"
-        value={resolved}
-        color="#22c55e"
-      />
-    </div>
-
-    {/* Table */}
-
-    <div
-      style={{
-        background: "#fff",
-        borderRadius: "15px",
-        padding: "25px",
-        boxShadow:
-          "0 5px 15px rgba(0,0,0,.08)",
-      }}
-    >
-      <h2
-        style={{
-          marginBottom: "20px",
-          color: "#0f172a",
-        }}
-      >
-        My Complaints
-      </h2>
-
-      {complaints.length === 0 ? (
-        <p>No complaints found.</p>
-      ) : (
         <table
           style={{
             width: "100%",
@@ -281,166 +145,198 @@ function StudentDashboard() {
           <thead>
             <tr
               style={{
-                background: "#f1f5f9",
+                background: "#f8fafc",
               }}
             >
-              <th style={{ padding: "12px" }}>
-                Title
-              </th>
+              <th style={thStyle}>Title</th>
 
-              <th style={{ padding: "12px" }}>
-                Category
-              </th>
+              <th style={thStyle}>Category</th>
 
-              <th style={{ padding: "12px" }}>
-                Date
-              </th>
+              <th style={thStyle}>Priority</th>
 
-              <th style={{ padding: "12px" }}>
-                Time
-              </th>
+              <th style={thStyle}>Date</th>
 
-              <th style={{ padding: "12px" }}>
-                Status
-              </th>
+              <th style={thStyle}>Time</th>
 
-              <th style={{ padding: "12px" }}>
-                Action
+              <th style={thStyle}>Status</th>
+
+              <th style={thStyle}>
+                Admin Remark
               </th>
             </tr>
           </thead>
 
           <tbody>
+
             {complaints.map((item) => (
+
               <tr
                 key={item._id}
                 style={{
-                  textAlign: "center",
                   borderBottom:
-                    "1px solid #ddd",
+                    "1px solid #f1f5f9",
                 }}
               >
-                <td
-                  style={{
-                    padding: "12px",
-                  }}
-                >
+
+                <td style={tdStyle}>
                   {item.title}
                 </td>
 
-                <td
-                  style={{
-                    padding: "12px",
-                  }}
-                >
+                <td style={tdStyle}>
                   {item.category}
                 </td>
 
-                <td
-                  style={{
-                    padding: "12px",
-                  }}
-                >
-                  {formatDate(
-                    item.createdAt
-                  )}
-                </td>
+                <td style={tdStyle}>
 
-                <td
-                  style={{
-                    padding: "12px",
-                  }}
-                >
-                  {formatTime(
-                    item.createdAt
-                  )}
-                </td>
-
-                <td
-                  style={{
-                    padding: "12px",
-                  }}
-                >
                   <span
                     style={{
                       background:
-                        getStatusColor(
-                          item.status
-                        ),
-                      color: "white",
-                      padding:
-                        "6px 12px",
-                      borderRadius:
-                        "20px",
+                        item.priority === "High"
+                          ? "#ef4444"
+                          : item.priority === "Medium"
+                          ? "#f59e0b"
+                          : "#22c55e",
+
+                      color: "#fff",
+
+                      padding: "6px 14px",
+
+                      borderRadius: "25px",
+
                       fontSize: "13px",
+
+                      fontWeight: "600",
+                    }}
+                  >
+                    {item.priority}
+                  </span>
+
+                </td>
+
+                <td style={tdStyle}>
+                  {formatDate(item.createdAt)}
+                </td>
+
+                <td style={tdStyle}>
+                  {formatTime(item.createdAt)}
+                </td>
+
+                <td style={tdStyle}>
+
+                  <span
+                    style={{
+                      background:
+                        getStatusColor(item.status),
+
+                      color: "#fff",
+
+                      padding: "6px 14px",
+
+                      borderRadius: "25px",
+
+                      fontSize: "13px",
+
+                      fontWeight: "600",
                     }}
                   >
                     {item.status}
                   </span>
+
                 </td>
 
                 <td
                   style={{
-                    padding: "12px",
+                    ...tdStyle,
+                    maxWidth: "280px",
+                    lineHeight: "1.6",
                   }}
                 >
-                  <button
-                    onClick={() =>
-                      setSelectedComplaint(
-                        item
-                      )
-                    }
-                    style={{
-                      background:
-                        "#2563eb",
-                      color: "white",
-                      border: "none",
-                      padding:
-                        "8px 15px",
-                      borderRadius:
-                        "6px",
-                      cursor:
-                        "pointer",
-                    }}
-                  >
-                    View
-                  </button>
+                  {item.remark ? (
+
+                    <div
+                      style={{
+                        background: "#eff6ff",
+                        borderLeft:
+                          "4px solid #2563eb",
+                        padding: "12px",
+                        borderRadius: "8px",
+                        color: "#334155",
+                        fontSize: "14px",
+                      }}
+                    >
+                      {item.remark}
+                    </div>
+
+                  ) : (
+
+                    <span
+                      style={{
+                        color: "#94a3b8",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      No remark yet
+                    </span>
+
+                  )}
+                </td>
+
+              </tr>
+
+            ))}
+                        {complaints.length === 0 && (
+              <tr>
+                <td
+                  colSpan="7"
+                  style={{
+                    textAlign: "center",
+                    padding: "40px",
+                    color: "#64748b",
+                    fontSize: "17px",
+                  }}
+                >
+                  No complaints found.
                 </td>
               </tr>
-            ))}
+            )}
+
           </tbody>
         </table>
-      )}
+      </div>
+
     </div>
+  );
+}
 
-    <ComplaintModal />
-  </div>
-);
+// ================= CARD =================
 
-// Card Component
-
-function Card({
-  title,
-  value,
-  color,
-}) {
+function Card({ title, value, color }) {
   return (
     <div
       style={{
         background: color,
-        color: "white",
-        padding: "25px",
-        borderRadius: "15px",
+        color: "#fff",
+        borderRadius: "14px",
+        padding: "22px",
         textAlign: "center",
-        boxShadow:
-          "0 5px 15px rgba(0,0,0,.1)",
+        boxShadow: "0 8px 18px rgba(0,0,0,.12)",
       }}
     >
-      <h3>{title}</h3>
+      <h3
+        style={{
+          margin: 0,
+          fontSize: "18px",
+          fontWeight: "600",
+        }}
+      >
+        {title}
+      </h3>
 
       <h1
         style={{
-          fontSize: "42px",
+          marginTop: "12px",
+          fontSize: "40px",
+          fontWeight: "700",
         }}
       >
         {value}
@@ -449,6 +345,20 @@ function Card({
   );
 }
 
-}
+// ================= TABLE STYLES =================
+
+const thStyle = {
+  padding: "15px",
+  textAlign: "left",
+  color: "#334155",
+  fontWeight: "700",
+  fontSize: "15px",
+};
+
+const tdStyle = {
+  padding: "15px",
+  color: "#475569",
+  verticalAlign: "top",
+};
 
 export default StudentDashboard;

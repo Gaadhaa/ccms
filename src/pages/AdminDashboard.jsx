@@ -2,62 +2,48 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 function AdminDashboard() {
-
   const [complaints, setComplaints] = useState([]);
-
-  const [selectedComplaint, setSelectedComplaint] =
-    useState(null);
 
   useEffect(() => {
     fetchComplaints();
   }, []);
 
-  // Fetch all complaints
-
   const fetchComplaints = async () => {
-
     try {
-
       const res = await axios.get(
         "http://localhost:5000/api/complaints"
       );
 
       setComplaints(res.data);
 
-    } catch (err) {
-
-      console.log(err);
-
+    } catch (error) {
+      console.log(error);
     }
-
   };
 
-  // Update Status
-
-  const updateStatus = async (id, status) => {
-
+  const updateComplaint = async (complaint) => {
     try {
 
       await axios.put(
-        `http://localhost:5000/api/complaints/${id}`,
+        `http://localhost:5000/api/complaints/${complaint._id}`,
         {
-          status,
+          status: complaint.status,
+          remark: complaint.remark,
         }
       );
 
+      alert("Complaint Updated Successfully");
+
       fetchComplaints();
 
-    } catch (err) {
+    } catch (error) {
 
-      console.log(err);
+      console.log(error);
 
-      alert("Status Update Failed");
+      alert("Failed to update complaint");
 
     }
-
   };
-
-  // Dashboard Counts
 
   const total = complaints.length;
 
@@ -73,379 +59,352 @@ function AdminDashboard() {
     (c) => c.status === "Resolved"
   ).length;
 
-  // Badge Color
+  return (
+    <div
+      style={{
+        maxWidth: "1300px",
+        margin: "35px auto",
+        padding: "20px",
+      }}
+    >
 
-  const getStatusColor = (status) => {
-
-    if (status === "Resolved")
-      return "#22c55e";
-
-    if (status === "In Progress")
-      return "#2563eb";
-
-    return "#f59e0b";
-
-  };
-
-  // Date
-
-  const formatDate = (date) => {
-
-    return new Date(date).toLocaleDateString(
-      "en-IN",
-      {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }
-    );
-
-  };
-
-  // Time
-
-  const formatTime = (date) => {
-
-    return new Date(date).toLocaleTimeString(
-      "en-IN"
-    );
-
-  };
-
-  // Popup
-
-  const ComplaintModal = () => {
-
-    if (!selectedComplaint) return null;
-
-    return (
+      {/* Header */}
 
       <div
         style={{
-          position: "fixed",
-          inset: 0,
-          background: "rgba(0,0,0,.45)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          zIndex: 999,
+          textAlign: "center",
+          marginBottom: "35px",
         }}
       >
-
-        <div
+        <h1
           style={{
-            width: "520px",
-            background: "#fff",
-            borderRadius: "15px",
-            padding: "30px",
-            boxShadow:
-              "0 10px 25px rgba(0,0,0,.2)",
+            fontSize: "42px",
+            color: "#0f172a",
+            marginBottom: "10px",
           }}
         >
+          Admin Dashboard
+        </h1>
 
-          <h2
-            style={{
-              color: "#2563eb",
-              marginBottom: "20px",
-            }}
-          >
-            Complaint Details
-          </h2>
-
-          <p>
-            <b>Student :</b>{" "}
-            {selectedComplaint.studentName}
-          </p>
-
-          <p>
-            <b>Email :</b>{" "}
-            {selectedComplaint.studentEmail}
-          </p>
-
-          <p>
-            <b>Title :</b>{" "}
-            {selectedComplaint.title}
-          </p>
-
-          <p>
-            <b>Category :</b>{" "}
-            {selectedComplaint.category}
-          </p>
-
-          <p>
-            <b>Status :</b>{" "}
-            {selectedComplaint.status}
-          </p>
-
-          <p>
-            <b>Date :</b>{" "}
-            {formatDate(
-              selectedComplaint.createdAt
-            )}
-          </p>
-
-          <p>
-            <b>Time :</b>{" "}
-            {formatTime(
-              selectedComplaint.createdAt
-            )}
-          </p>
-
-          <button
-            onClick={() =>
-              setSelectedComplaint(null)
-            }
-            style={{
-              width: "100%",
-              padding: "12px",
-              marginTop: "20px",
-              border: "none",
-              background: "#2563eb",
-              color: "#fff",
-              borderRadius: "8px",
-              cursor: "pointer",
-            }}
-          >
-            Close
-          </button>
-
-        </div>
-
+        <p
+          style={{
+            color: "#64748b",
+            fontSize: "17px",
+          }}
+        >
+          Manage student complaints efficiently
+        </p>
       </div>
 
-    );
+      {/* Dashboard Cards */}
 
-  };
-  return (
-  <div
-    style={{
-      maxWidth: "1300px",
-      margin: "30px auto",
-      padding: "20px",
-    }}
-  >
-    {/* Header */}
-
-    <div
-      style={{
-        textAlign: "center",
-        marginBottom: "35px",
-      }}
-    >
-      <h1
+      <div
         style={{
-          fontSize: "42px",
-          color: "#0f172a",
+          display: "grid",
+          gridTemplateColumns:
+            "repeat(4,1fr)",
+          gap: "20px",
+          marginBottom: "35px",
         }}
       >
-        Admin Dashboard
-      </h1>
 
-      <p
+        <Card
+          title="Total"
+          value={total}
+          color="#2563eb"
+        />
+
+        <Card
+          title="Pending"
+          value={pending}
+          color="#f59e0b"
+        />
+
+        <Card
+          title="In Progress"
+          value={inProgress}
+          color="#3b82f6"
+        />
+
+        <Card
+          title="Resolved"
+          value={resolved}
+          color="#22c55e"
+        />
+
+      </div>
+            {/* Complaint Table */}
+
+      <div
         style={{
-          color: "#64748b",
+          background: "#fff",
+          borderRadius: "15px",
+          boxShadow:
+            "0 8px 20px rgba(0,0,0,.08)",
+          overflow: "hidden",
         }}
       >
-        Manage Student Complaints
-      </p>
-    </div>
-
-    {/* Cards */}
-
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns:
-          "repeat(auto-fit,minmax(220px,1fr))",
-        gap: "20px",
-        marginBottom: "35px",
-      }}
-    >
-      <Card title="Total" value={total} color="#2563eb" />
-      <Card title="Pending" value={pending} color="#f59e0b" />
-      <Card
-        title="In Progress"
-        value={inProgress}
-        color="#3b82f6"
-      />
-      <Card
-        title="Resolved"
-        value={resolved}
-        color="#22c55e"
-      />
-    </div>
-
-    {/* Complaint Table */}
-
-    <div
-      style={{
-        background: "#fff",
-        borderRadius: "15px",
-        padding: "25px",
-        boxShadow: "0 5px 15px rgba(0,0,0,.08)",
-      }}
-    >
-      <h2
-        style={{
-          marginBottom: "20px",
-          color: "#0f172a",
-        }}
-      >
-        Complaint Management
-      </h2>
-
-      <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-        }}
-      >
-        <thead>
-          <tr
+        <div
+          style={{
+            padding: "20px",
+            borderBottom: "1px solid #e5e7eb",
+          }}
+        >
+          <h2
             style={{
-              background: "#f1f5f9",
+              margin: 0,
+              color: "#0f172a",
             }}
           >
-            <th style={{ padding: "12px" }}>Student</th>
+            Complaint Management
+          </h2>
+        </div>
 
-            <th style={{ padding: "12px" }}>Complaint</th>
-
-            <th style={{ padding: "12px" }}>Category</th>
-
-            <th style={{ padding: "12px" }}>Date</th>
-
-            <th style={{ padding: "12px" }}>Time</th>
-
-            <th style={{ padding: "12px" }}>Status</th>
-
-            <th style={{ padding: "12px" }}>Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {complaints.map((item) => (
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+          }}
+        >
+          <thead>
             <tr
-              key={item._id}
               style={{
-                borderBottom: "1px solid #e5e7eb",
-                textAlign: "center",
+                background: "#f8fafc",
               }}
             >
-              <td style={{ padding: "12px" }}>
-                {item.studentName}
-              </td>
+              <th style={thStyle}>Student</th>
 
-              <td style={{ padding: "12px" }}>
-                {item.title}
-              </td>
+              <th style={thStyle}>Complaint</th>
 
-              <td style={{ padding: "12px" }}>
-                {item.category}
-              </td>
+              <th style={thStyle}>Category</th>
 
-              <td style={{ padding: "12px" }}>
-                {formatDate(item.createdAt)}
-              </td>
+              <th style={thStyle}>Priority</th>
 
-              <td style={{ padding: "12px" }}>
-                {formatTime(item.createdAt)}
-              </td>
+              <th style={thStyle}>Status</th>
 
-              <td style={{ padding: "12px" }}>
-                <span
-                  style={{
-                    background: getStatusColor(
-                      item.status
-                    ),
-                    color: "#fff",
-                    padding: "6px 12px",
-                    borderRadius: "20px",
-                    fontSize: "13px",
-                  }}
-                >
-                  {item.status}
-                </span>
-              </td>
+              <th style={thStyle}>
+                Admin Remark
+              </th>
 
-              <td style={{ padding: "12px" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "8px",
-                    justifyContent: "center",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <button
-                    onClick={() =>
-                      setSelectedComplaint(item)
-                    }
+              <th style={thStyle}>
+                Action
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            {complaints.map((item) => (
+
+              <tr
+                key={item._id}
+                style={{
+                  borderBottom:
+                    "1px solid #f1f5f9",
+                }}
+              >
+
+                <td style={tdStyle}>
+                  {item.studentName}
+                </td>
+
+                <td style={tdStyle}>
+                  {item.title}
+                </td>
+
+                <td style={tdStyle}>
+                  {item.category}
+                </td>
+
+                <td style={tdStyle}>
+
+                  <span
                     style={{
-                      background: "#2563eb",
+                      padding:
+                        "5px 12px",
+                      borderRadius:
+                        "20px",
                       color: "#fff",
-                      border: "none",
-                      padding: "8px 14px",
-                      borderRadius: "6px",
-                      cursor: "pointer",
+                      background:
+                        item.priority ===
+                        "High"
+                          ? "#ef4444"
+                          : item.priority ===
+                            "Medium"
+                          ? "#f59e0b"
+                          : "#22c55e",
                     }}
                   >
-                    View
-                  </button>
+                    {item.priority}
+                  </span>
+
+                </td>
+
+                <td style={tdStyle}>
 
                   <select
                     value={item.status}
-                    onChange={(e) =>
-                      updateStatus(
-                        item._id,
-                        e.target.value
+                    onChange={(e) => {
+
+                      const updated =
+                        [...complaints];
+
+                      updated.find(
+                        (c) =>
+                          c._id ===
+                          item._id
+                      ).status =
+                        e.target.value;
+
+                      setComplaints(
+                        updated
+                      );
+
+                    }}
+                    style={{
+                      padding: "8px",
+                      borderRadius:
+                        "8px",
+                    }}
+                  >
+                    <option>
+                      Pending
+                    </option>
+
+                    <option>
+                      In Progress
+                    </option>
+
+                    <option>
+                      Resolved
+                    </option>
+
+                  </select>
+
+                </td>
+
+                <td style={tdStyle}>
+
+                  <textarea
+                    rows="3"
+                    placeholder="Write remark..."
+                    value={
+                      item.remark || ""
+                    }
+                    onChange={(e) => {
+
+                      const updated =
+                        [...complaints];
+
+                      updated.find(
+                        (c) =>
+                          c._id ===
+                          item._id
+                      ).remark =
+                        e.target.value;
+
+                      setComplaints(
+                        updated
+                      );
+
+                    }}
+                    style={{
+                      width: "230px",
+                      padding: "10px",
+                      borderRadius:
+                        "8px",
+                      border:
+                        "1px solid #cbd5e1",
+                      resize: "none",
+                    }}
+                  />
+
+                </td>
+
+                <td style={tdStyle}>
+
+                  <button
+                    onClick={() =>
+                      updateComplaint(
+                        item
                       )
                     }
                     style={{
-                      padding: "8px",
-                      borderRadius: "6px",
+                      background:
+                        "#2563eb",
+                      color: "#fff",
+                      border: "none",
+                      padding:
+                        "10px 18px",
+                      borderRadius:
+                        "8px",
+                      cursor:
+                        "pointer",
+                      fontWeight:
+                        "600",
                     }}
                   >
-                    <option>Pending</option>
-                    <option>In Progress</option>
-                    <option>Resolved</option>
-                  </select>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                    Update
+                  </button>
+
+                </td>
+
+              </tr>
+
+            ))}
+                        {complaints.length === 0 && (
+              <tr>
+                <td
+                  colSpan="7"
+                  style={{
+                    textAlign: "center",
+                    padding: "40px",
+                    color: "#64748b",
+                    fontSize: "17px",
+                  }}
+                >
+                  No complaints found.
+                </td>
+              </tr>
+            )}
+
+          </tbody>
+        </table>
+      </div>
+
     </div>
+  );
+}
 
-    <ComplaintModal />
-  </div>
-);
+// ================= CARD =================
 
-// Card Component
-
-function Card({
-  title,
-  value,
-  color,
-}) {
+function Card({ title, value, color }) {
   return (
     <div
       style={{
         background: color,
         color: "#fff",
-        borderRadius: "15px",
-        padding: "25px",
+        borderRadius: "14px",
+        padding: "22px",
         textAlign: "center",
-        boxShadow:
-          "0 5px 15px rgba(0,0,0,.1)",
+        boxShadow: "0 8px 18px rgba(0,0,0,.12)",
       }}
     >
-      <h3>{title}</h3>
+      <h3
+        style={{
+          margin: 0,
+          fontSize: "18px",
+          fontWeight: "600",
+        }}
+      >
+        {title}
+      </h3>
 
       <h1
         style={{
-          fontSize: "42px",
-          marginTop: "10px",
+          marginTop: "12px",
+          fontSize: "40px",
+          fontWeight: "700",
         }}
       >
         {value}
@@ -454,6 +413,20 @@ function Card({
   );
 }
 
-}
+// ================= TABLE STYLES =================
+
+const thStyle = {
+  padding: "15px",
+  textAlign: "left",
+  color: "#334155",
+  fontWeight: "700",
+  fontSize: "15px",
+};
+
+const tdStyle = {
+  padding: "15px",
+  color: "#475569",
+  verticalAlign: "top",
+};
 
 export default AdminDashboard;

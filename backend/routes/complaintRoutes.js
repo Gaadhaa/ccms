@@ -4,24 +4,29 @@ import sendMail from "../utils/sendMail.js";
 
 const router = express.Router();
 
-
 // ================= GET ALL COMPLAINTS =================
 
 router.get("/", async (req, res) => {
   try {
-    const complaints = await Complaint.find();
+    const complaints = await Complaint.find().sort({
+      createdAt: -1,
+    });
+
     res.json(complaints);
+
   } catch (error) {
+
     res.status(500).json({
       message: error.message,
     });
+
   }
 });
-
 
 // ================= CREATE COMPLAINT =================
 
 router.post("/", async (req, res) => {
+
   try {
 
     let priority = "Low";
@@ -31,19 +36,39 @@ router.post("/", async (req, res) => {
       req.body.category === "Electrical"
     ) {
       priority = "High";
-    } else if (
+    }
+
+    else if (
       req.body.category === "Hostel" ||
       req.body.category === "Transport"
     ) {
       priority = "Medium";
     }
 
-    const complaint = await Complaint.create({
-      ...req.body,
-      priority,
-    });
+    const complaint =
+      await Complaint.create({
 
-    res.status(201).json(complaint);
+        title: req.body.title,
+
+        category: req.body.category,
+
+        status: "Pending",
+
+        priority,
+
+        remark: "",
+
+        studentName:
+          req.body.studentName,
+
+        studentEmail:
+          req.body.studentEmail,
+
+      });
+
+    res.status(201).json(
+      complaint
+    );
 
   } catch (error) {
 
@@ -52,30 +77,38 @@ router.post("/", async (req, res) => {
     });
 
   }
+
 });
-
-
 // ================= UPDATE COMPLAINT =================
 
 router.put("/:id", async (req, res) => {
-
   try {
 
+    // Get existing complaint
     const oldComplaint = await Complaint.findById(
       req.params.id
     );
 
+    if (!oldComplaint) {
+      return res.status(404).json({
+        message: "Complaint not found",
+      });
+    }
+
+    // Update complaint
     const complaint =
       await Complaint.findByIdAndUpdate(
         req.params.id,
-        req.body,
+        {
+          status: req.body.status,
+          remark: req.body.remark,
+        },
         {
           new: true,
         }
       );
 
     // Send email only when status changes to Resolved
-
     if (
       oldComplaint.status !== "Resolved" &&
       complaint.status === "Resolved"
@@ -86,13 +119,13 @@ router.put("/:id", async (req, res) => {
         complaint.studentName,
         complaint.title,
         complaint.category,
-        complaint.status
+        complaint.status,
+        complaint.remark
       );
 
       console.log(
-        "Resolution email sent successfully."
+        "✅ Resolution email sent successfully."
       );
-
     }
 
     res.json(complaint);
@@ -106,15 +139,23 @@ router.put("/:id", async (req, res) => {
     });
 
   }
-
 });
-
-
 // ================= DELETE COMPLAINT =================
 
 router.delete("/:id", async (req, res) => {
 
   try {
+
+    const complaint =
+      await Complaint.findById(req.params.id);
+
+    if (!complaint) {
+
+      return res.status(404).json({
+        message: "Complaint not found",
+      });
+
+    }
 
     await Complaint.findByIdAndDelete(
       req.params.id
@@ -127,6 +168,8 @@ router.delete("/:id", async (req, res) => {
 
   } catch (error) {
 
+    console.log(error);
+
     res.status(500).json({
       message: error.message,
     });
@@ -135,5 +178,6 @@ router.delete("/:id", async (req, res) => {
 
 });
 
+// ================= EXPORT =================
 
 export default router;
